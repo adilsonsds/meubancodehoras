@@ -8,11 +8,11 @@
             <form v-on:submit.prevent="entrar">
               <div class="form-group">
                 <label for="signin-email">E-mail</label>
-                <input type="email" name="signin-email" id="signin-email" class="form-control">
+                <input type="email" name="signin-email" id="signin-email" class="form-control" maxlength="100" required>
               </div>
               <div class="form-group">
                 <label for="signin-senha">Senha</label>
-                <input type="password" name="signin-senha" id="signin-senha" class="form-control">
+                <input type="password" name="signin-senha" id="signin-senha" class="form-control" minlength="6" maxlength="20" required>
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Entrar</button>
@@ -28,15 +28,15 @@
             <form v-on:submit.prevent="cadastrar">
               <div class="form-group">
                 <label for="signup-nome">Nome completo</label>
-                <input type="nome" name="signup-nome" id="signup-nome" class="form-control">
+                <input type="nome" name="signup-nome" id="signup-nome" class="form-control" maxlength="100" required>
               </div>
               <div class="form-group">
                 <label for="signup-email">E-mail</label>
-                <input type="email" name="signup-email" id="signup-email" class="form-control">
+                <input type="email" name="signup-email" id="signup-email" class="form-control" maxlength="100" required>
               </div>
               <div class="form-group">
                 <label for="signup-senha">Senha</label>
-                <input type="password" name="signup-senha" id="signup-senha" class="form-control">
+                <input type="password" name="signup-senha" id="signup-senha" class="form-control" minlength="6" maxlength="20" required>
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Cadastrar</button>
