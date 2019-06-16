@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import firebase from 'firebase';
 
 import Home from '@/pages/Home'
+import Lancamento from '@/pages/Lancamento'
 import Dashboard from '@/pages/Dashboard'
 import Config from '@/pages/Config'
 
@@ -14,6 +15,14 @@ const routers = new Router({
       path: '/dashboard',
       name: 'dashboard',
       component: Dashboard,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/lancamento',
+      name: 'lancamento',
+      component: Lancamento,
       meta: {
         requiresAuth: true
       }

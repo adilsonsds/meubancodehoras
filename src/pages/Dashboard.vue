@@ -1,47 +1,140 @@
 <template>
   <div class="container">
-    <div class="row">
+    <div class="row mb-4">
+      <div class="col-sm-6 col-12">
+        <h5>Ações rápidas</h5>
+        <div class="d-block">
+          <button
+            class="btn btn-primary mb-2 mr-2"
+            @click="registrarEntrada"
+          >Registrar entrada de hoje</button>
+          <button class="btn btn-secondary mb-2">Registrar um dia passado de trabalho</button>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-4 col-12 mb-2">
+        <div class="card text-white bg-danger p-3">
+          <div class="car-body">
+            <div class="card-text">Seu saldo atual é</div>
+            <h5 class="card-title m-0">-72 min</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-4 col-12">
+        <div class="card text-white bg-success p-3">
+          <div class="car-body">
+            <div class="card-text">Você ultrapssou sua meta em</div>
+            <h5 class="card-title m-0">2 min</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="row mb-4">
       <div class="col">
-        <h1>Dashoboard works!</h1>
+        <h5>Histórico dos lançamentos</h5>
         <grafico :width="1110" :height="400" :chart-data="datacollection"></grafico>
+      </div>
+    </div> -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Dia</th>
+                <th scope="col">Hora de entrada</th>
+                <th scope="col">Hora de saída</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(dia, index) in diasDeTrabalho" :key="'dia-'+index">
+                <td>{{dia.data.toLocaleDateString()}}</td>
+                <td>{{dia.horaEntradaTrabalho}}</td>
+                <td>{{dia.horaSaidaTrabalho}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import Grafico from "@/components/Grafico.vue";
-import { setTimeout } from 'timers';
+import db from "@/firebase/init";
 export default {
   components: {
     Grafico
   },
   data() {
     return {
-      datacollection: null
+      datacollection: null,
+      diasDeTrabalho: [],
+      showModal: false
     };
   },
   mounted() {
-    setTimeout(
-    this.carregarDadosDoGrafico(), 1000);
+    this.carregarDadosDoGrafico();
   },
   methods: {
     carregarDadosDoGrafico() {
-      const dias = ['01/06', '02/06', '03/06', '10/06', '11/06', '13/06'];
-      const tempo = 
+      const self = this;
+      let usuario = this.$store.getters.usuarioAutenticado;
 
-      this.datacollection = {
-        labels: dias,
-        datasets: [
-          {
-            label: "Tempo",
-            backgroundColor: "transparent",
-            borderColor: "green",
-            data: [0, 5, 2, 9, 1, 4]
-          }
-        ]
-      };
+      db.collection("usuarios")
+        .doc(usuario.email)
+        .collection("diasDeTrabalho")
+        .get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            let lancamento = doc.data();
+            var partes = doc.id.split('-') //rever essa parte
+            Object.assign(lancamento, { data: new Date(partes[0], partes[1] - 1, partes[2]) });
+            self.diasDeTrabalho.push(lancamento);
+          });
+
+          // const dias = self.diasDeTrabalho.map(
+          //   d =>
+          //     `${("0" + d.data.getDate()).slice(-2)}/${(
+          //       "0" +
+          //       (d.data.getMonth() + 1)
+          //     ).slice(-2)}`
+          // );
+          // const saldosDosDias = self.diasDeTrabalho.map(d => d.saldoFinal);
+
+          // self.datacollection = {
+          //   labels: dias,
+          //   datasets: [
+          //     {
+          //       label: "Tempo",
+          //       backgroundColor: "transparent",
+          //       borderColor: "green",
+          //       data: saldosDosDias
+          //     }
+          //   ]
+          // };
+        });
+    },
+    registrarEntrada() {
+      this.$router.push({ name: "lancamento" });
     }
   }
 };
 </script>
+<style>
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: table;
+  transition: opacity 0.3s ease;
+}
 
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+</style>

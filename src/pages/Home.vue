@@ -92,6 +92,7 @@
 </template>
 <script>
 import firebase from "firebase";
+import db from "@/firebase/init";
 export default {
   data() {
     return {
@@ -124,12 +125,30 @@ export default {
       firebase
         .auth()
         .createUserWithEmailAndPassword(this.signup.email, this.signup.senha)
-        .then(user => {
-          self.$router.push({ name: "config" });
+        .then(res => {
+          self.cadastrarUsuario(res.user);
         })
         .catch(err => {
           alert("Oops. " + err.message);
         });
+    },
+    cadastrarUsuario(user) {debugger;
+      user = user || firebase.auth().currentUser;
+
+      if (!user) return;
+
+      let usuario = {
+        nome: user.displayName || this.signup.nome,
+        email: user.email,
+        urlFoto: user.photoURL
+      };
+
+      db.collection("usuarios")
+        .doc(usuario.email)
+        .set(usuario, { merge: true });
+
+      this.$store.commit("loginSuccess", usuario);
+      this.$router.push({ name: "config" });
     }
   }
 };

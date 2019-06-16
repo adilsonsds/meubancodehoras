@@ -8,22 +8,34 @@
             <h6 class="card-subtitle text-muted mb-4">Aplique as configurações iniciais.</h6>
             <form class="form" v-on:submit.prevent="salvar">
               <div class="form-group">
-                <label for="minha-meta">Minha meta é ficar com:</label>
-                <div class="input-group">
-                    <input type="number" id="minha-meta" class="form-control" v-model="metaEmMinutos" required>
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">minutos</div>
-                    </div>
-                </div>
+                <label for="tempo-inicial">Meu banco de horas inicial é:</label>
+                <input
+                  type="time"
+                  id="tempo-inicial"
+                  class="form-control"
+                  v-model="saldoInicialBancoDeHoras"
+                  required
+                >
               </div>
               <div class="form-group">
-                <label for="valor-inicial">Meu banco de horas inicial é:</label>
-                <div class="input-group">
-                    <input type="number" id="valor-inicial" class="form-control" v-model="valorInicial" required>
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">minutos</div>
-                    </div>
-                </div>
+                <label for="tempo-meta">Minha meta é ficar com:</label>
+                <input
+                  type="time"
+                  id="tempo-meta"
+                  class="form-control"
+                  v-model="metaBancoDeHoras"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label for="tempo-trabalho">Trabalho x horas por dia:</label>
+                <input
+                  type="time"
+                  id="tempo-trabalho"
+                  class="form-control"
+                  v-model="tempoDeTrabalhoPorDia"
+                  required
+                >
               </div>
               <div class="form-group">
                 <button type="submit" class="btn btn-primary">Continuar</button>
@@ -36,17 +48,35 @@
   </div>
 </template>
 <script>
+import db from "@/firebase/init";
 export default {
   data() {
     return {
-        metaEmMinutos: 0,
-        valorInicial: 0
+      saldoInicialBancoDeHoras: null,
+      metaBancoDeHoras: null,
+      tempoDeTrabalhoPorDia: null
     };
   },
   methods: {
     salvar() {
+      let usuario = this.$store.getters.usuarioAutenticado;
+      usuario.saldoInicialBancoDeHoras = this.saldoInicialBancoDeHoras;
+      usuario.tempoDeTrabalhoPorDia = this.tempoDeTrabalhoPorDia;
+      usuario.metaBancoDeHoras = this.metaBancoDeHoras;
+
+      db.collection("usuarios")
+        .doc(usuario.email)
+        .set(usuario, { merge: true });
+
+      this.$store.commit("updateUser", usuario);
       this.$router.push({ name: "dashboard" });
     }
+  },
+  created() {
+    let usuario = this.$store.getters.usuarioAutenticado;
+    this.saldoInicialBancoDeHoras = usuario.saldoInicialBancoDeHoras;
+    this.tempoDeTrabalhoPorDia = usuario.tempoDeTrabalhoPorDia;
+    this.metaBancoDeHoras = usuario.metaBancoDeHoras;
   }
 };
 </script>
