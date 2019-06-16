@@ -8,11 +8,28 @@
             <form v-on:submit.prevent="entrar">
               <div class="form-group">
                 <label for="signin-email">E-mail</label>
-                <input type="email" name="signin-email" id="signin-email" class="form-control" maxlength="100" required>
+                <input
+                  v-model="signin.email"
+                  type="email"
+                  name="signin-email"
+                  id="signin-email"
+                  class="form-control"
+                  maxlength="100"
+                  required
+                >
               </div>
               <div class="form-group">
                 <label for="signin-senha">Senha</label>
-                <input type="password" name="signin-senha" id="signin-senha" class="form-control" minlength="6" maxlength="20" required>
+                <input
+                  v-model="signin.senha"
+                  type="password"
+                  name="signin-senha"
+                  id="signin-senha"
+                  class="form-control"
+                  minlength="6"
+                  maxlength="20"
+                  required
+                >
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Entrar</button>
@@ -28,15 +45,40 @@
             <form v-on:submit.prevent="cadastrar">
               <div class="form-group">
                 <label for="signup-nome">Nome completo</label>
-                <input type="nome" name="signup-nome" id="signup-nome" class="form-control" maxlength="100" required>
+                <input
+                  v-model="signup.nome"
+                  type="nome"
+                  name="signup-nome"
+                  id="signup-nome"
+                  class="form-control"
+                  maxlength="100"
+                  required
+                >
               </div>
               <div class="form-group">
                 <label for="signup-email">E-mail</label>
-                <input type="email" name="signup-email" id="signup-email" class="form-control" maxlength="100" required>
+                <input
+                  v-model="signup.email"
+                  type="email"
+                  name="signup-email"
+                  id="signup-email"
+                  class="form-control"
+                  maxlength="100"
+                  required
+                >
               </div>
               <div class="form-group">
                 <label for="signup-senha">Senha</label>
-                <input type="password" name="signup-senha" id="signup-senha" class="form-control" minlength="6" maxlength="20" required>
+                <input
+                  v-model="signup.senha"
+                  type="password"
+                  name="signup-senha"
+                  id="signup-senha"
+                  class="form-control"
+                  minlength="6"
+                  maxlength="20"
+                  required
+                >
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -49,6 +91,7 @@
   </div>
 </template>
 <script>
+import firebase from "firebase";
 export default {
   data() {
     return {
@@ -65,10 +108,28 @@ export default {
   },
   methods: {
     entrar() {
-      this.$router.push({ name: "dashboard" });
+      const self = this;
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.signin.email, this.signin.senha)
+        .then(user => {
+          self.$router.push({ name: "dashboard" });
+        })
+        .catch(err => {
+          alert("Oops. " + err.message);
+        });
     },
     cadastrar() {
-      this.$router.push({ name: "config" });
+      const self = this;
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(this.signup.email, this.signup.senha)
+        .then(user => {
+          self.$router.push({ name: "config" });
+        })
+        .catch(err => {
+          alert("Oops. " + err.message);
+        });
     }
   }
 };

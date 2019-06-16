@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import firebase from 'firebase';
 
 import Home from '@/pages/Home'
 import Dashboard from '@/pages/Dashboard'
@@ -7,17 +8,23 @@ import Config from '@/pages/Config'
 
 Vue.use(Router)
 
-export default new Router({
+const routers = new Router({
   routes: [
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: Dashboard
+      component: Dashboard,
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/config',
       name: 'config',
-      component: Config
+      component: Config,
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/',
@@ -26,4 +33,15 @@ export default new Router({
     }
   ],
   mode: 'history'
-})
+});
+
+routers.beforeEach((to, from, next) => {
+  const currentUser = firebase.auth().currentUser;
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  if (requiresAuth && !currentUser) next('/');
+  else if (!requiresAuth && currentUser && to.name == 'home') next('dashboard');
+  else next();
+});
+
+export default routers;
