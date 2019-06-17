@@ -7,11 +7,11 @@
           <button
             class="btn btn-primary mb-2 mr-2"
             @click="registrarEntrada"
-          >Registrar entrada de hoje</button>
-          <button class="btn btn-secondary mb-2">Registrar um dia passado de trabalho</button>
+          >Registrar dia de trabalho</button>
+          <!-- <button class="btn btn-secondary mb-2">Registrar um dia passado de trabalho</button> -->
         </div>
       </div>
-      <div class="col-md-3 col-sm-4 col-12 mb-2">
+      <!-- <div class="col-md-3 col-sm-4 col-12 mb-2">
         <div class="card text-white bg-danger p-3">
           <div class="car-body">
             <div class="card-text">Seu saldo atual é</div>
@@ -26,7 +26,7 @@
             <h5 class="card-title m-0">2 min</h5>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
     <!-- <div class="row mb-4">
       <div class="col">
