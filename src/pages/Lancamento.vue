@@ -58,6 +58,7 @@
           </div>
           <div class="row mb-4">
             <div class="col-12">
+              <router-link :to="{name: 'dashboard'}" class="btn btn-warning">Cancelar</router-link>
               <button
                 type="button"
                 class="btn btn-secondary"
