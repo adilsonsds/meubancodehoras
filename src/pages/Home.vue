@@ -113,8 +113,15 @@ export default {
       firebase
         .auth()
         .signInWithEmailAndPassword(this.signin.email, this.signin.senha)
-        .then(user => {
-          self.$router.push({ name: "dashboard" });
+        .then(res => {
+          
+          db.collection("usuarios")
+            .doc(self.signin.email)
+            .get()
+            .then(doc => {
+              self.$store.commit("loginSuccess", doc.data());
+              self.$router.push({ name: "dashboard" });
+            });
         })
         .catch(err => {
           alert("Oops. " + err.message);
@@ -132,7 +139,8 @@ export default {
           alert("Oops. " + err.message);
         });
     },
-    cadastrarUsuario(user) {debugger;
+    cadastrarUsuario(user) {
+      debugger;
       user = user || firebase.auth().currentUser;
 
       if (!user) return;
