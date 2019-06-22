@@ -5,14 +5,18 @@
         <h5 class="mb-4">Faça aqui o lançamento do seu dia de trabalho</h5>
         <form @submit.prevent="salvar">
           <div class="form-group row">
-            <label class="col-md-2 col-sm-4 col-form-label" for="dia">Dia</label>
-            <div class="col-md-10 col-sm-8">
-              <input type="date" id="dia" class="form-control" v-model="diaDeTrabalho" @change="carregarDia" required>
+            <label class="col-md-2 col-sm-4 col-form-label" for="dia-entrada">Entrada na empresa</label>
+            <div class="col-md-5 col-sm-4 mb-2">
+              <input
+                type="date"
+                id="dia-entrada"
+                class="form-control"
+                v-model="diaEntradaTrabalho"
+                @change="carregarDia"
+                required
+              >
             </div>
-          </div>
-          <div class="form-group row">
-            <label class="col-md-2 col-sm-4 col-form-label" for="hora-entrada">Entrada na empresa</label>
-            <div class="col-md-10 col-sm-8">
+            <div class="col-md-5 col-sm-4">
               <input
                 type="time"
                 id="hora-entrada"
@@ -23,8 +27,17 @@
             </div>
           </div>
           <div class="form-group row">
-            <label class="col-md-2 col-sm-4 col-form-label" for="hora-saida">Saída da empresa</label>
-            <div class="col-md-10 col-sm-8">
+            <label class="col-md-2 col-sm-4 col-form-label" for="dia-saida">Saída da empresa</label>
+            <div class="col-md-5 col-sm-4 mb-2">
+              <input
+                type="date"
+                id="dia-saida"
+                class="form-control"
+                v-model="diaSaidaTrabalho"
+                required
+              >
+            </div>
+            <div class="col-md-5 col-sm-4">
               <input type="time" id="hora-saida" class="form-control" v-model="horaSaidaTrabalho">
             </div>
           </div>
@@ -73,12 +86,14 @@
   </div>
 </template>
 <script>
-import db from "@/firebase/init";
+import db from "@/firebase/init"
+import moment from 'moment'
 export default {
   data() {
     return {
-      diaDeTrabalho: null,
+      diaEntradaTrabalho: null,
       horaEntradaTrabalho: null,
+      diaSaidaTrabalho: null,
       horaSaidaTrabalho: null,
       intervalos: [{ horaInicio: null, horaFim: null }]
     };
@@ -94,33 +109,41 @@ export default {
       let usuario = this.$store.getters.usuarioAutenticado;
 
       let lancamento = {
-        horaEntradaTrabalho: this.horaEntradaTrabalho,
-        horaSaidaTrabalho: this.horaSaidaTrabalho,
+        entradaTrabalho: moment(this.diaEntradaTrabalho + 'T' + this.horaEntradaTrabalho).toDate(),
+        saidaTrabalho: moment(this.diaSaidaTrabalho + 'T' + this.horaSaidaTrabalho).toDate(),
         intervalos: this.intervalos
       };
 
       db.collection("usuarios")
         .doc(usuario.email)
         .collection("diasDeTrabalho")
-        .doc(this.diaDeTrabalho)
+        .doc(this.diaEntradaTrabalho)
         .set(lancamento, { merge: true });
 
       this.$router.push({ name: "dashboard" });
     },
     carregarDia() {
       const self = this;
+      this.diaSaidaTrabalho = this.diaEntradaTrabalho;
       let usuario = this.$store.getters.usuarioAutenticado;
 
       db.collection("usuarios")
         .doc(usuario.email)
         .collection("diasDeTrabalho")
-        .doc(this.diaDeTrabalho)
+        .doc(this.diaEntradaTrabalho)
         .get()
         .then(doc => {
           let lancamento = doc.data();
-          self.horaEntradaTrabalho = lancamento.horaEntradaTrabalho;
-          self.horaSaidaTrabalho = lancamento.horaSaidaTrabalho;
-          self.intervalos = lancamento.intervalos;
+          if (lancamento) {
+            self.diaEntradaTrabalho = moment(lancamento.entradaTrabalho.toDate()).format('YYYY-MM-DD');
+            self.horaEntradaTrabalho = moment(lancamento.entradaTrabalho.toDate()).format('HH:mm');
+            self.intervalos = lancamento.intervalos;
+
+            if (lancamento.saidaTrabalho) {
+              self.diaSaidaTrabalho = moment(lancamento.saidaTrabalho.toDate()).format('YYYY-MM-DD');
+              self.horaSaidaTrabalho = moment(lancamento.saidaTrabalho.toDate()).format('HH:mm');
+            }
+          }
         });
     }
   }

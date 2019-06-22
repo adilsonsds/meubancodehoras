@@ -140,7 +140,6 @@ export default {
         });
     },
     cadastrarUsuario(user) {
-      debugger;
       user = user || firebase.auth().currentUser;
 
       if (!user) return;

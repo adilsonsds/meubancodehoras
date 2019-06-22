@@ -47,9 +47,9 @@
             </thead>
             <tbody>
               <tr v-for="(dia, index) in diasDeTrabalho" :key="'dia-'+index">
-                <td>{{dia.data.toLocaleDateString()}}</td>
-                <td>{{dia.horaEntradaTrabalho}}</td>
-                <td>{{dia.horaSaidaTrabalho}}</td>
+                <td>{{ moment(dia.entradaTrabalho.toDate()).format('DD/MM/YYYY')}}</td>
+                <td>{{ moment(dia.entradaTrabalho.toDate()).format('HH:mm')}}</td>
+                <td>{{ moment(dia.saidaTrabalho.toDate()).format('HH:mm')}}</td>
               </tr>
             </tbody>
           </table>
@@ -61,12 +61,14 @@
 <script>
 import Grafico from "@/components/Grafico.vue";
 import db from "@/firebase/init";
+import moment from 'moment'
 export default {
   components: {
     Grafico
   },
   data() {
     return {
+      moment:moment,
       datacollection: null,
       diasDeTrabalho: [],
       showModal: false
@@ -87,8 +89,8 @@ export default {
         .then(querySnapshot => {
           querySnapshot.forEach(doc => {
             let lancamento = doc.data();
-            var partes = doc.id.split('-') //rever essa parte
-            Object.assign(lancamento, { data: new Date(partes[0], partes[1] - 1, partes[2]) });
+            // var partes = doc.id.split('-') //rever essa parte
+            // Object.assign(lancamento, { data: new Date(partes[0], partes[1] - 1, partes[2]) });
             self.diasDeTrabalho.push(lancamento);
           });
 
