@@ -26,14 +26,14 @@
             <h5 class="card-title m-0">2 min</h5>
           </div>
         </div>
-      </div> -->
+      </div>-->
     </div>
-    <!-- <div class="row mb-4">
+    <div class="row mb-4">
       <div class="col">
         <h5>Histórico dos lançamentos</h5>
         <grafico :width="1110" :height="400" :chart-data="datacollection"></grafico>
       </div>
-    </div> -->
+    </div>
     <div class="row mb-3">
       <div class="col-12">
         <div class="table-responsive">
@@ -61,17 +61,17 @@
 <script>
 import Grafico from "@/components/Grafico.vue";
 import db from "@/firebase/init";
-import moment from 'moment'
+import moment from "moment";
 export default {
   components: {
     Grafico
   },
   data() {
     return {
-      moment:moment,
+      moment: moment,
       datacollection: null,
       diasDeTrabalho: [],
-      showModal: false
+      showModal: false,
     };
   },
   mounted() {
@@ -89,31 +89,28 @@ export default {
         .then(querySnapshot => {
           querySnapshot.forEach(doc => {
             let lancamento = doc.data();
-            // var partes = doc.id.split('-') //rever essa parte
-            // Object.assign(lancamento, { data: new Date(partes[0], partes[1] - 1, partes[2]) });
             self.diasDeTrabalho.push(lancamento);
           });
 
-          // const dias = self.diasDeTrabalho.map(
-          //   d =>
-          //     `${("0" + d.data.getDate()).slice(-2)}/${(
-          //       "0" +
-          //       (d.data.getMonth() + 1)
-          //     ).slice(-2)}`
-          // );
-          // const saldosDosDias = self.diasDeTrabalho.map(d => d.saldoFinal);
+          const dias = self.diasDeTrabalho.map(
+            d => moment(d.entradaTrabalho.toDate()).format('DD/MM')
+          );
 
-          // self.datacollection = {
-          //   labels: dias,
-          //   datasets: [
-          //     {
-          //       label: "Tempo",
-          //       backgroundColor: "transparent",
-          //       borderColor: "green",
-          //       data: saldosDosDias
-          //     }
-          //   ]
-          // };
+          const saldos = self.diasDeTrabalho.map(
+            d => d.quantoTabalharMenosQuantoTrabalho * -1
+          );
+
+          self.datacollection = {
+            labels: dias,
+            datasets: [
+              {
+                label: "Tempo",
+                backgroundColor: "transparent",
+                borderColor: "green",
+                data: saldos
+              }
+            ]
+          };
         });
     },
     registrarEntrada() {

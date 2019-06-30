@@ -122,17 +122,17 @@ export default {
       
       const entradaNoTrabalho = moment(this.diaEntradaTrabalho + 'T' + this.horaEntradaTrabalho)
       const saidaDoTrabalho = moment(this.diaSaidaTrabalho + 'T' + this.horaSaidaTrabalho)
-
-      let quantoTrabalhou = saidaDoTrabalho.diff(entradaNoTrabalho, 'minutes')
-
+      
+      let quantoFicouNosIntervalos = 0;
       this.intervalos.forEach(intervalo => {
 
           const inicio = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaInicio)
           const fim = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaFim)
 
-          quantoTrabalhou -= fim.diff(inicio, 'minutes')
+          quantoFicouNosIntervalos += fim.diff(inicio, 'minutes')
       });
 
+      const quantoTrabalhou = saidaDoTrabalho.diff(entradaNoTrabalho, 'minutes') - quantoFicouNosIntervalos;
       const quantoDeveriaTrabalhar = moment.duration(usuario.tempoDeTrabalhoPorDia).asMinutes();
       const quantoTabalharMenosQuantoTrabalho = quantoDeveriaTrabalhar - quantoTrabalhou;
 
