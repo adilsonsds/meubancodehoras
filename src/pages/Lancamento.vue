@@ -107,12 +107,7 @@ export default {
     },
     salvar() {
       let usuario = this.$store.getters.usuarioAutenticado;
-
-      let lancamento = {
-        entradaTrabalho: moment(this.diaEntradaTrabalho + 'T' + this.horaEntradaTrabalho).toDate(),
-        saidaTrabalho: moment(this.diaSaidaTrabalho + 'T' + this.horaSaidaTrabalho).toDate(),
-        intervalos: this.intervalos
-      };
+      let lancamento = this.obterDadosParaSalvar();
 
       db.collection("usuarios")
         .doc(usuario.email)
@@ -121,6 +116,36 @@ export default {
         .set(lancamento, { merge: true });
 
       this.$router.push({ name: "dashboard" });
+    },
+    obterDadosParaSalvar() {
+      let usuario = this.$store.getters.usuarioAutenticado;
+      
+      const entradaNoTrabalho = moment(this.diaEntradaTrabalho + 'T' + this.horaEntradaTrabalho)
+      const saidaDoTrabalho = moment(this.diaSaidaTrabalho + 'T' + this.horaSaidaTrabalho)
+
+      let quantoTrabalhou = saidaDoTrabalho.diff(entradaNoTrabalho, 'minutes')
+
+      this.intervalos.forEach(intervalo => {
+
+          const inicio = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaInicio)
+          const fim = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaFim)
+
+          quantoTrabalhou -= fim.diff(inicio, 'minutes')
+      });
+
+      const quantoDeveriaTrabalhar = moment.duration(usuario.tempoDeTrabalhoPorDia).asMinutes();
+      const quantoTabalharMenosQuantoTrabalho = quantoDeveriaTrabalhar - quantoTrabalhou;
+
+      let lancamento = {
+        entradaTrabalho: entradaNoTrabalho.toDate(),
+        saidaTrabalho: saidaDoTrabalho.toDate(),
+        intervalos: this.intervalos,
+        quantoDeveriaTrabalhar: quantoDeveriaTrabalhar,
+        quantoTrabalhou: quantoTrabalhou,
+        quantoTabalharMenosQuantoTrabalho,
+      }
+
+      return lancamento;
     },
     carregarDia() {
       const self = this;
