@@ -5,6 +5,10 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4">Já sou cadastrado</h5>
+            <button @click.prevent="entrarComGoogle" class="btn" style="color:#FFF;background:#e44a34">
+              <i class="fab fa-google" style="font-size: 14px;"></i> | Entrar com Google
+            </button>
+            <p class="card-text my-2">ou</p>
             <form v-on:submit.prevent="entrar">
               <div class="form-group">
                 <label for="signin-email">E-mail</label>
@@ -42,6 +46,10 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4">Ainda não tenho cadastro</h5>
+            <button @click.prevent="entrarComGoogle" class="btn" style="color:#FFF;background:#e44a34">
+              <i class="fab fa-google" style="font-size: 14px;"></i> | Cadastrar com Google
+            </button>
+            <p class="card-text my-2">ou</p>
             <form v-on:submit.prevent="cadastrar">
               <div class="form-group">
                 <label for="signup-nome">Nome completo</label>
@@ -156,6 +164,17 @@ export default {
 
       this.$store.commit("loginSuccess", usuario);
       this.$router.push({ name: "config" });
+    },
+    entrarComGoogle() {
+      const self = this;
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          if (result.user) {
+            self.cadastrarUsuario(result.user);
+          }
+        })
+        .catch(err => alert("Ops." + err.message));
     }
   }
 };
