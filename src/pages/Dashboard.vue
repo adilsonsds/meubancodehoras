@@ -120,7 +120,7 @@ export default {
           );
 
           const saldos = self.diasDeTrabalho.map(
-            d => d.quantoTabalharMenosQuantoTrabalho * -1
+            d => d.saldoNoFinalDoDia * -1
           );
 
           self.datacollection = {

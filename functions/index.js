@@ -10,8 +10,8 @@ exports.contarSaldoNoBancoDeHoras = functions.firestore
         if (!change.after.exists)
             throw new Error('Não foi possível calcular, pois o arquivo foi excluído')
 
-        const saldoAnterior = change.before.exists ? change.before.data().quantoTabalharMenosQuantoTrabalho : 0;
-        const novoSaldo = change.after.data().quantoTabalharMenosQuantoTrabalho;
+        const saldoAnterior = change.before.exists ? change.before.data().saldoNoFinalDoDia : 0;
+        const novoSaldo = change.after.data().saldoNoFinalDoDia;
         const valorParaAplicar = novoSaldo - saldoAnterior;
 
         const usuarioRef = change.after.ref.parent.parent;

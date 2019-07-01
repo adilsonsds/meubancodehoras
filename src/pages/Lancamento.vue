@@ -160,7 +160,7 @@ export default {
       const quantoDeveriaTrabalhar = moment
         .duration(usuario.tempoDeTrabalhoPorDia)
         .asMinutes();
-      const quantoTabalharMenosQuantoTrabalho =
+      const saldoNoFinalDoDia =
         quantoTrabalhou - quantoDeveriaTrabalhar;
 
       let lancamento = {
@@ -169,7 +169,7 @@ export default {
         intervalos: this.intervalos,
         quantoDeveriaTrabalhar: quantoDeveriaTrabalhar,
         quantoTrabalhou: quantoTrabalhou,
-        quantoTabalharMenosQuantoTrabalho
+        saldoNoFinalDoDia
       };
 
       return lancamento;
