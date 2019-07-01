@@ -11,22 +11,36 @@
           <!-- <button class="btn btn-secondary mb-2">Registrar um dia passado de trabalho</button> -->
         </div>
       </div>
-      <!-- <div class="col-md-3 col-sm-4 col-12 mb-2">
-        <div class="card text-white bg-danger p-3">
+      <div class="col-md-3 col-sm-4 col-12 mb-2">
+        <div class="card text-white p-3" v-bind:class="[usuarioAutenticado.saldoBancoDeHoras >= 0? 'bg-success': 'bg-danger']">
           <div class="car-body">
             <div class="card-text">Seu saldo atual é</div>
-            <h5 class="card-title m-0">-72 min</h5>
+            <h5 class="card-title m-0">
+              {{ usuarioAutenticado.saldoBancoDeHoras }} minutos
+            </h5>
           </div>
         </div>
       </div>
-      <div class="col-md-3 col-sm-4 col-12">
+      <div v-if="saldoMetaEmMinutos >= 0" class="col-md-3 col-sm-4 col-12">
         <div class="card text-white bg-success p-3">
           <div class="car-body">
             <div class="card-text">Você ultrapssou sua meta em</div>
-            <h5 class="card-title m-0">2 min</h5>
+            <h5 class="card-title m-0">
+              {{ saldoMetaEmMinutos }} minutos
+            </h5>
           </div>
         </div>
-      </div>-->
+      </div>
+      <div v-else class="col-md-3 col-sm-4 col-12">
+        <div class="card text-white bg-danger p-3">
+          <div class="car-body">
+            <div class="card-text">Para atingir sua meta, faltam</div>
+            <h5 class="card-title m-0">
+              {{ Math.abs(saldoMetaEmMinutos) }} minutos
+            </h5>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="row mb-4">
       <div class="col">
@@ -77,10 +91,19 @@ export default {
   mounted() {
     this.carregarDadosDoGrafico();
   },
+  computed: {
+    usuarioAutenticado() {
+      return this.$store.getters.usuarioAutenticado;
+    },
+    saldoMetaEmMinutos() {
+      let metaEmMinutos = moment.duration(this.usuarioAutenticado.metaBancoDeHoras).asMinutes()
+      return this.usuarioAutenticado.saldoBancoDeHoras - metaEmMinutos;
+    }
+  },
   methods: {
     carregarDadosDoGrafico() {
       const self = this;
-      let usuario = this.$store.getters.usuarioAutenticado;
+      let usuario = this.usuarioAutenticado;
 
       db.collection("usuarios")
         .doc(usuario.email)

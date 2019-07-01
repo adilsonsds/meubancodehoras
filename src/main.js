@@ -4,12 +4,13 @@ import App from './App'
 import storeData from './store';
 import router from './router'
 import firebase from 'firebase';
+import moment from 'moment';
 import './firebase/init';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 Vue.config.productionTip = false
-
+moment.locale('pt-BR');
 Vue.use(Vuex);
 const store = new Vuex.Store(storeData);
 

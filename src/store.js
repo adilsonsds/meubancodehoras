@@ -59,7 +59,7 @@ export default {
 
       //   delete axios.defaults.headers.common["Authorization"];
     },
-    updateUser(state, userUpdated) {
+    updateUser(state, userUpdated) {debugger
       state.usuarioAutenticado = userUpdated;
     }
   },

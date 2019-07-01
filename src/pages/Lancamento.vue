@@ -14,7 +14,7 @@
                 v-model="diaEntradaTrabalho"
                 @change="carregarDia"
                 required
-              >
+              />
             </div>
             <div class="col-md-5 col-sm-4">
               <input
@@ -23,7 +23,7 @@
                 class="form-control"
                 required
                 v-model="horaEntradaTrabalho"
-              >
+              />
             </div>
           </div>
           <div class="form-group row">
@@ -35,10 +35,10 @@
                 class="form-control"
                 v-model="diaSaidaTrabalho"
                 required
-              >
+              />
             </div>
             <div class="col-md-5 col-sm-4">
-              <input type="time" id="hora-saida" class="form-control" v-model="horaSaidaTrabalho">
+              <input type="time" id="hora-saida" class="form-control" v-model="horaSaidaTrabalho" />
             </div>
           </div>
           <h6 class="my-4">Intervalos</h6>
@@ -47,7 +47,7 @@
               <div class="form-group row">
                 <label class="col-md-2 col-sm-4 col-form-label">Início</label>
                 <div class="col-md-10 col-sm-8">
-                  <input type="time" class="form-control" v-model="intervalo.horaInicio">
+                  <input type="time" class="form-control" v-model="intervalo.horaInicio" />
                 </div>
               </div>
             </div>
@@ -55,7 +55,7 @@
               <div class="form-group row">
                 <label class="col-md-2 col-sm-4 col-form-label">Fim</label>
                 <div class="col-md-10 col-sm-8">
-                  <input type="time" class="form-control" v-model="intervalo.horaFim">
+                  <input type="time" class="form-control" v-model="intervalo.horaFim" />
                 </div>
               </div>
             </div>
@@ -86,8 +86,9 @@
   </div>
 </template>
 <script>
-import db from "@/firebase/init"
-import moment from 'moment'
+import db from "@/firebase/init";
+import moment from "moment";
+import { setTimeout } from 'timers';
 export default {
   data() {
     return {
@@ -106,35 +107,61 @@ export default {
       this.intervalos.push({ horaInicio: null, horaFim: null });
     },
     salvar() {
-      let usuario = this.$store.getters.usuarioAutenticado;
+      const self = this;
+      const usuario = this.$store.getters.usuarioAutenticado;
       let lancamento = this.obterDadosParaSalvar();
 
       db.collection("usuarios")
         .doc(usuario.email)
         .collection("diasDeTrabalho")
         .doc(this.diaEntradaTrabalho)
-        .set(lancamento, { merge: true });
-
-      this.$router.push({ name: "dashboard" });
+        .set(lancamento, { merge: true })
+        .then(result => {
+          setTimeout(()=> { // Necessário, pois a requisição está retornando o valor desatualizado
+            self.obterDadosAtualizadosAposTerSalvoComSucesso();
+          }, 500)
+        });
     },
-    obterDadosParaSalvar() {
+    obterDadosAtualizadosAposTerSalvoComSucesso() {
+      const self = this;
       let usuario = this.$store.getters.usuarioAutenticado;
-      
-      const entradaNoTrabalho = moment(this.diaEntradaTrabalho + 'T' + this.horaEntradaTrabalho)
-      const saidaDoTrabalho = moment(this.diaSaidaTrabalho + 'T' + this.horaSaidaTrabalho)
-      
+
+      db.collection("usuarios")
+        .doc(usuario.email)
+        .get()
+        .then(doc => {
+          self.$store.commit("updateUser", doc.data());
+          self.$router.push({ name: "dashboard" });
+        });
+    },
+    obterDadosParaSalvar() {debugger
+      let usuario = this.$store.getters.usuarioAutenticado;
+
+      const entradaNoTrabalho = moment(
+        this.diaEntradaTrabalho + "T" + this.horaEntradaTrabalho
+      );
+      const saidaDoTrabalho = moment(
+        this.diaSaidaTrabalho + "T" + this.horaSaidaTrabalho
+      );
+
       let quantoFicouNosIntervalos = 0;
       this.intervalos.forEach(intervalo => {
+        const inicio = moment(
+          this.diaEntradaTrabalho + "T" + intervalo.horaInicio
+        );
+        const fim = moment(this.diaEntradaTrabalho + "T" + intervalo.horaFim);
 
-          const inicio = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaInicio)
-          const fim = moment(this.diaEntradaTrabalho + 'T' + intervalo.horaFim)
-
-          quantoFicouNosIntervalos += fim.diff(inicio, 'minutes')
+        quantoFicouNosIntervalos += fim.diff(inicio, "minutes");
       });
 
-      const quantoTrabalhou = saidaDoTrabalho.diff(entradaNoTrabalho, 'minutes') - quantoFicouNosIntervalos;
-      const quantoDeveriaTrabalhar = moment.duration(usuario.tempoDeTrabalhoPorDia).asMinutes();
-      const quantoTabalharMenosQuantoTrabalho = quantoDeveriaTrabalhar - quantoTrabalhou;
+      const quantoTrabalhou =
+        saidaDoTrabalho.diff(entradaNoTrabalho, "minutes") -
+        quantoFicouNosIntervalos;
+      const quantoDeveriaTrabalhar = moment
+        .duration(usuario.tempoDeTrabalhoPorDia)
+        .asMinutes();
+      const quantoTabalharMenosQuantoTrabalho =
+        quantoTrabalhou - quantoDeveriaTrabalhar;
 
       let lancamento = {
         entradaTrabalho: entradaNoTrabalho.toDate(),
@@ -142,8 +169,8 @@ export default {
         intervalos: this.intervalos,
         quantoDeveriaTrabalhar: quantoDeveriaTrabalhar,
         quantoTrabalhou: quantoTrabalhou,
-        quantoTabalharMenosQuantoTrabalho,
-      }
+        quantoTabalharMenosQuantoTrabalho
+      };
 
       return lancamento;
     },
@@ -160,13 +187,21 @@ export default {
         .then(doc => {
           let lancamento = doc.data();
           if (lancamento) {
-            self.diaEntradaTrabalho = moment(lancamento.entradaTrabalho.toDate()).format('YYYY-MM-DD');
-            self.horaEntradaTrabalho = moment(lancamento.entradaTrabalho.toDate()).format('HH:mm');
+            self.diaEntradaTrabalho = moment(
+              lancamento.entradaTrabalho.toDate()
+            ).format("YYYY-MM-DD");
+            self.horaEntradaTrabalho = moment(
+              lancamento.entradaTrabalho.toDate()
+            ).format("HH:mm");
             self.intervalos = lancamento.intervalos;
 
             if (lancamento.saidaTrabalho) {
-              self.diaSaidaTrabalho = moment(lancamento.saidaTrabalho.toDate()).format('YYYY-MM-DD');
-              self.horaSaidaTrabalho = moment(lancamento.saidaTrabalho.toDate()).format('HH:mm');
+              self.diaSaidaTrabalho = moment(
+                lancamento.saidaTrabalho.toDate()
+              ).format("YYYY-MM-DD");
+              self.horaSaidaTrabalho = moment(
+                lancamento.saidaTrabalho.toDate()
+              ).format("HH:mm");
             }
           }
         });
