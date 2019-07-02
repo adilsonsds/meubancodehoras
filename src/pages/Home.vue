@@ -5,7 +5,11 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4">Já sou cadastrado</h5>
-            <button @click.prevent="entrarComGoogle" class="btn" style="color:#FFF;background:#e44a34">
+            <button
+              @click.prevent="entrarComGoogle"
+              class="btn"
+              style="color:#FFF;background:#e44a34"
+            >
               <i class="fab fa-google" style="font-size: 14px;"></i> | Entrar com Google
             </button>
             <p class="card-text my-2">ou</p>
@@ -20,7 +24,7 @@
                   class="form-control"
                   maxlength="100"
                   required
-                >
+                />
               </div>
               <div class="form-group">
                 <label for="signin-senha">Senha</label>
@@ -33,7 +37,7 @@
                   minlength="6"
                   maxlength="20"
                   required
-                >
+                />
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Entrar</button>
@@ -46,7 +50,11 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title mb-4">Ainda não tenho cadastro</h5>
-            <button @click.prevent="entrarComGoogle" class="btn" style="color:#FFF;background:#e44a34">
+            <button
+              @click.prevent="entrarComGoogle"
+              class="btn"
+              style="color:#FFF;background:#e44a34"
+            >
               <i class="fab fa-google" style="font-size: 14px;"></i> | Cadastrar com Google
             </button>
             <p class="card-text my-2">ou</p>
@@ -61,7 +69,7 @@
                   class="form-control"
                   maxlength="100"
                   required
-                >
+                />
               </div>
               <div class="form-group">
                 <label for="signup-email">E-mail</label>
@@ -73,7 +81,7 @@
                   class="form-control"
                   maxlength="100"
                   required
-                >
+                />
               </div>
               <div class="form-group">
                 <label for="signup-senha">Senha</label>
@@ -86,7 +94,7 @@
                   minlength="6"
                   maxlength="20"
                   required
-                >
+                />
               </div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -122,14 +130,7 @@ export default {
         .auth()
         .signInWithEmailAndPassword(this.signin.email, this.signin.senha)
         .then(res => {
-          
-          db.collection("usuarios")
-            .doc(self.signin.email)
-            .get()
-            .then(doc => {
-              self.$store.commit("loginSuccess", doc.data());
-              self.$router.push({ name: "dashboard" });
-            });
+          self.carregarUsuarioAposCadastroDaConta(this.signin.email);
         })
         .catch(err => {
           alert("Oops. " + err.message);
@@ -145,6 +146,19 @@ export default {
         })
         .catch(err => {
           alert("Oops. " + err.message);
+        });
+    },
+    carregarUsuarioAposCadastroDaConta(email) {
+      const self = this;
+      db.collection("usuarios")
+        .doc(email)
+        .get()
+        .then(doc => {
+          self.$store.commit("loginSuccess", doc.data());
+          self.$router.push({ name: "dashboard" });
+        })
+        .catch(err => {
+          self.cadastrarUsuario();
         });
     },
     cadastrarUsuario(user) {
@@ -168,10 +182,12 @@ export default {
     entrarComGoogle() {
       const self = this;
       const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
+      firebase
+        .auth()
+        .signInWithPopup(provider)
         .then(result => {
           if (result.user) {
-            self.cadastrarUsuario(result.user);
+            self.carregarUsuarioAposCadastroDaConta(result.user.email);
           }
         })
         .catch(err => alert("Ops." + err.message));
