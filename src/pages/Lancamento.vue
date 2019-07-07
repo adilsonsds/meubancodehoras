@@ -71,7 +71,7 @@
           </div>
           <div class="row mb-4">
             <div class="col-12">
-              <router-link :to="{name: 'dashboard'}" class="btn btn-warning">Cancelar</router-link>
+              <router-link :to="{name: 'dashboard'}" class="btn btn-warning">Voltar</router-link>
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -88,7 +88,7 @@
 <script>
 import db from "@/firebase/init";
 import moment from "moment";
-import { setTimeout } from 'timers';
+import { setTimeout } from "timers";
 export default {
   data() {
     return {
@@ -96,7 +96,8 @@ export default {
       horaEntradaTrabalho: null,
       diaSaidaTrabalho: null,
       horaSaidaTrabalho: null,
-      intervalos: [{ horaInicio: null, horaFim: null }]
+      intervalos: [{ horaInicio: null, horaFim: null }],
+      saldoNoFinalDoDiaAnterior: 0
     };
   },
   methods: {
@@ -117,24 +118,23 @@ export default {
         .doc(this.diaEntradaTrabalho)
         .set(lancamento, { merge: true })
         .then(result => {
-          setTimeout(()=> { // Necessário, pois a requisição está retornando o valor desatualizado
-            self.obterDadosAtualizadosAposTerSalvoComSucesso();
-          }, 500)
+          alert("Dados salvos com sucesso.");
+          self.limparFormulario();
+          
+          let saldoParaAplicar =
+            lancamento.saldoNoFinalDoDia - self.saldoNoFinalDoDiaAnterior;
+          self.$store.commit("updateSaldoBancoDeHoras", saldoParaAplicar);
         });
     },
-    obterDadosAtualizadosAposTerSalvoComSucesso() {
-      const self = this;
-      let usuario = this.$store.getters.usuarioAutenticado;
-
-      db.collection("usuarios")
-        .doc(usuario.email)
-        .get()
-        .then(doc => {
-          self.$store.commit("updateUser", doc.data());
-          self.$router.push({ name: "dashboard" });
-        });
+    limparFormulario() {
+      this.diaEntradaTrabalho = null;
+      this.horaEntradaTrabalho = null;
+      this.diaSaidaTrabalho = null;
+      this.horaSaidaTrabalho = null;
+      this.intervalos = [{ horaInicio: null, horaFim: null }];
+      this.saldoNoFinalDoDiaAnterior = 0;
     },
-    obterDadosParaSalvar() {debugger
+    obterDadosParaSalvar() {
       let usuario = this.$store.getters.usuarioAutenticado;
 
       const entradaNoTrabalho = moment(
@@ -160,8 +160,7 @@ export default {
       const quantoDeveriaTrabalhar = moment
         .duration(usuario.tempoDeTrabalhoPorDia)
         .asMinutes();
-      const saldoNoFinalDoDia =
-        quantoTrabalhou - quantoDeveriaTrabalhar;
+      const saldoNoFinalDoDia = quantoTrabalhou - quantoDeveriaTrabalhar;
 
       let lancamento = {
         entradaTrabalho: entradaNoTrabalho.toDate(),
@@ -203,6 +202,10 @@ export default {
                 lancamento.saidaTrabalho.toDate()
               ).format("HH:mm");
             }
+
+            self.saldoNoFinalDoDiaAnterior = lancamento.saldoNoFinalDoDia || 0;
+          } else {
+            self.saldoNoFinalDoDiaAnterior = 0;
           }
         });
     }

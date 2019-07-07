@@ -1,7 +1,6 @@
 import {
   ObterUsuario
 } from "@/services/AuthService";
-import { stat } from "fs";
 
 const usuario = ObterUsuario();
 
@@ -59,8 +58,12 @@ export default {
 
       //   delete axios.defaults.headers.common["Authorization"];
     },
-    updateUser(state, userUpdated) {debugger
+    updateUser(state, userUpdated) {
       state.usuarioAutenticado = userUpdated;
+    },
+    updateSaldoBancoDeHoras(state, saldoParaAplicar) {
+      debugger
+      state.usuarioAutenticado.saldoBancoDeHoras += saldoParaAplicar;
     }
   },
   actions: {
